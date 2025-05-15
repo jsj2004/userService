@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from database import engine, get_db
 import models, schemas, auth
 from fastapi.middleware.cors import CORSMiddleware
+from mail import sendmail
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -55,6 +56,7 @@ def reset_password(request: Request,resetpass : schemas.ResetPasswordRequest,db:
     base_url = str(request.base_url)
     reset_link = f"{base_url}reset-password?token={access_token}"
     print(reset_link)
+    sendmail(user.email,reset_link)
     # emailing it to be implemented later for now I'm printing
 
 
