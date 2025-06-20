@@ -134,3 +134,42 @@ async def reset_password_form(token: str):
     if not email:
         raise HTTPException(status_code=400, detail="Invalid or expired token")
     return {"msg": "Token valid. Show reset password form"}
+
+def mock_get_current_user_for_pact():
+    """A mock dependency that returns a predefined user."""
+    return models.User(id=1, name='Test User', email='user@example.com', role='customer')
+                       
+@app.post("/pact-states")
+def provider_states(state: schemas.ProviderState, db: Session = Depends(get_db)):
+    print(f"Received provider state: {state.state} ({state.action})")
+    
+    state_mapping = {
+        "An authenticated user with a valid token exists for user_id 1": setup_authenticated_user,
+    }
+
+    if state.state in state_mapping:
+        state_mapping[state.state](action=state.action)
+    
+    return {"result": f"State '{state.state}' processed."}
+def setup_authenticated_user(action: str):
+    """Sets up the dependency override for an authenticated user."""
+    if action == "setup":
+        app.dependency_overrides[get_current_user] = mock_get_current_user_for_pact
+    elif action == "teardown":
+        app.dependency_overrides = {}
+'''
+@app.post("/_pact/provider_states")
+async def provider_states(provider_state: schemas.ProviderState = Body(...)):
+    print(f"Setting up provider state: {provider_state.state} for consumer: {provider_state.consumer}")
+    if provider_state.state == "User an_existing_user exists":
+        # Logic to ensure a user exists for the test
+        # e.g., mock your get_db dependency or add a user to a test DB
+        # This is highly dependent on your app's architecture
+        # For your app, you might mock `db.query(models.User).filter(...).first()`
+        # to return a specific user when this state is active.
+        pass
+    elif provider_state.state == "User a_non_existing_user does not exist":
+        # Logic to ensure a user does NOT exist
+        pass
+    # Add more states as needed by your consumer contracts
+    return {"result": f"State '{provider_state.state}' set up."}'''

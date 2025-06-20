@@ -61,6 +61,10 @@ class UpdateUserRequest(BaseModel):
 class Error(BaseModel):
     message: str
 
+class ProviderState(BaseModel):
+    state: str
+    action: str = "setup"
+
 
 
 

@@ -41,3 +41,4 @@ class CartItem(Base):
     
     # Relationship to the User model
     user = relationship("User", back_populates="cart_items")
+
