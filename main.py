@@ -27,7 +27,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 @app.post("/users/signup", response_model=schemas.User)
 def signup_user(user: schemas.SignupRequest, db: Session = Depends(get_db)):
-    db_user = db.query(models.User).filter(models.User.name == user.name).first()
+    db_user = db.query(models.User).filter(models.User.email == user.email).first()
     if db_user:
         raise HTTPException(status_code=400, detail="Username already registered")
     hashed_password = auth.get_password_hash(user.password)
